@@ -6,18 +6,20 @@ import json
 from pathlib import Path
 import queue
 import sys
+import tempfile
 import threading
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
 from installer_core import PROVIDERS, Project, install_from_repository
+from setup_wizard import ToolsWizard, open_setup
 
 
 class Wizard:
     def __init__(self, root):
         self.root = root
         self.root.title("Agent Toolkit Setup")
-        self.root.geometry("740x540")
+        self.root.geometry("780x610")
         self.root.minsize(650, 500)
         self.events = queue.Queue()
         self.running = False
@@ -54,13 +56,17 @@ class Wizard:
             self.fields.append(entry)
         self.change_provider()
         ttk.Label(frame,text="Requires Git, Python 3.11+, Node.js/npm. No GitHub sign-in needed.\nAPI keys stay in environment variables. Optional audit CLIs are reported separately.",wraplength=680).grid(row=6,column=0,columnspan=3,sticky="w",pady=8)
+        self.guide=tk.BooleanVar(value=True)
+        ttk.Checkbutton(frame,text="Guide optional tool setup after installation",variable=self.guide).grid(row=7,column=0,columnspan=2,sticky="w")
+        self.configure=ttk.Button(frame,text="Configure existing tools",command=self.configure_tools)
+        self.configure.grid(row=7,column=2,sticky="e")
         self.button=ttk.Button(frame,text="Install toolkit",command=self.start)
-        self.button.grid(row=7,column=0,columnspan=3,sticky="e",pady=8)
+        self.button.grid(row=8,column=2,sticky="e",pady=8)
         self.status=tk.StringVar(value="Ready")
-        ttk.Label(frame,textvariable=self.status).grid(row=8,column=0,columnspan=3,sticky="w")
+        ttk.Label(frame,textvariable=self.status).grid(row=9,column=0,columnspan=3,sticky="w")
         self.log=tk.Text(frame,height=8,wrap="word",state="disabled",font=("Consolas",9))
-        self.log.grid(row=9,column=0,columnspan=3,sticky="nsew",pady=(8,0))
-        frame.rowconfigure(9,weight=1)
+        self.log.grid(row=10,column=0,columnspan=3,sticky="nsew",pady=(8,0))
+        frame.rowconfigure(10,weight=1)
         self.root.protocol("WM_DELETE_WINDOW",self.close)
         self.root.after(100,self.poll)
 
@@ -74,6 +80,14 @@ class Wizard:
     def change_provider(self,event=None):
         if PROVIDERS.get(self.provider.get())=="opencode": self.models.grid()
         else: self.models.grid_remove()
+
+    def configure_tools(self):
+        try:
+            if not self.destination.get().strip():
+                raise ValueError("Choose the installed project folder first.")
+            ToolsWizard(self.root,Path(self.destination.get()))
+        except (ValueError,OSError,KeyError):
+            messagebox.showerror("Check project","Choose a project with an installed toolkit and selected provider.")
 
     def project(self):
         if not self.destination.get().strip(): raise ValueError("Choose a project folder.")
@@ -92,6 +106,7 @@ class Wizard:
         self.select.configure(state="disabled")
         self.browse.configure(state="disabled")
         self.button.configure(state="disabled")
+        self.configure.configure(state="disabled")
         self.status.set("Installing...")
         def worker():
             try:
@@ -111,6 +126,7 @@ class Wizard:
                 for field in self.fields: field.configure(state="normal")
                 self.select.configure(state="readonly")
                 self.browse.configure(state="normal");self.button.configure(state="normal")
+                if hasattr(self,"configure"): self.configure.configure(state="normal")
                 if kind=="error":
                     self.status.set("Setup needs attention");messagebox.showerror("Installation stopped",value)
                 else:
@@ -125,6 +141,7 @@ class Wizard:
                     if value["issues"]: details+="\n\nIssues:\n"+"\n".join(value["issues"])
                     if complete: messagebox.showinfo("Setup result",details)
                     else: messagebox.showwarning("Setup incomplete",details)
+                    if complete and hasattr(self,"guide") and self.guide.get(): self.configure_tools()
         self.root.after(100,self.poll)
 
     def close(self):
@@ -137,6 +154,7 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--self-test",type=Path,help="Check packaged UI and write a JSON result without installing")
     parser.add_argument("--install",action="store_true")
+    parser.add_argument("--configure-tools",action="store_true",help="Open optional tool setup for an installed project")
     parser.add_argument("--project",type=Path)
     parser.add_argument("--name")
     parser.add_argument("--provider",choices=list(PROVIDERS.values()))
@@ -156,8 +174,23 @@ def main():
         for provider in PROVIDERS:
             wizard.provider.set(provider);wizard.change_provider();wizard.project()
         root.update_idletasks()
-        args.self_test.write_text(json.dumps({"status":"passed","simplified_form":True,"latest_stable_release":True,"provider_selection_required":True,"providers":list(PROVIDERS),"tk_version":tk.TkVersion}),encoding="utf-8")
+        with tempfile.TemporaryDirectory(prefix='toolkit-ui-check-') as directory:
+            project=Path(directory)
+            (project/'.agent-toolkit').mkdir()
+            (project/'.agent-toolkit/project.json').write_text(json.dumps({'provider':'claude'}))
+            from tool_runtime import RECIPES
+            (project/'.agent-toolkit/registry.json').write_text(json.dumps({'tools':[{'id':name} for name in RECIPES]}))
+            guided=ToolsWizard(root,project)
+            guided.window.withdraw()
+            root.update_idletasks()
+            if len(guided.selected)!=5 or guided.persist.get():
+                raise RuntimeError('Guided tools/credential consent controls failed')
+            guided.window.destroy()
+        args.self_test.write_text(json.dumps({"status":"passed","simplified_form":True,"guided_tools":hasattr(wizard,"guide"),"guided_window_constructed":True,"latest_stable_release":True,"provider_selection_required":True,"providers":list(PROVIDERS),"tk_version":tk.TkVersion}),encoding="utf-8")
         root.destroy();return 0
+    if args.configure_tools:
+        if not args.project: parser.error("--configure-tools requires --project")
+        open_setup(args.project);return 0
     if args.install:
         if not args.project or not args.name or not args.provider:
             parser.error("--install requires --project, --name and --provider")

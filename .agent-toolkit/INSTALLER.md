@@ -18,7 +18,7 @@ No client is preselected in the form; scripted setup requires `--provider`. Afte
 
 OpenCode is a client: select IDs actually exposed by the authenticated underlying provider. These mappings are configuration, not evidence that a provider currently exposes a particular model.
 
-Every installation automatically resolves the latest published stable release of the public `Noizboy/agent-toolkit` repository through GitHub's latest-release API. There are no repository, version or description inputs, and GitHub sign-in is not required. Setup records the selected release and resolved commit in project metadata and the installation report. Discovery failures stop installation; setup does not fall back to an older release or a branch. Credentials are never requested in the form or written into project files. Existing recorded descriptions are retained when reinstalling; add new project context directly to `AGENTS.md`.
+Every installation automatically resolves the latest published stable release of the public `Noizboy/agent-toolkit` repository through GitHub's latest-release API. There are no repository, version or description inputs, and GitHub sign-in is not required. Setup records the selected release and resolved commit in project metadata and the installation report. Discovery failures stop installation; setup does not fall back to an older release or a branch. Optional guided setup requests masked keys separately and never writes credentials into project files. Existing recorded descriptions are retained when reinstalling; add new project context directly to `AGENTS.md`.
 
 ## Requirements and results
 
@@ -30,7 +30,19 @@ An uninstalled checkout contains the canonical `.agent-toolkit/` and shared `.ag
 
 ## Updating an existing project
 
-The current source release is `v0.3.2`. Each installer run downloads the latest stable release automatically. Projects installed from older toolkit revisions are not automatically deleted or overwritten. Review reported source/routing collisions, preserve custom files and merge deliberately. The `v0.1.0` layout additionally requires a deliberate migration to the neutral shared directory. Do not treat a clean source download as permission to remove an old native layout.
+The current source release is `v0.4.0`. Each installer run downloads the latest stable release automatically. Projects installed from older toolkit revisions are not automatically deleted or overwritten. Review reported source/routing collisions, preserve custom files and merge deliberately. The `v0.1.0` layout additionally requires a deliberate migration to the neutral shared directory. Do not treat a clean source download as permission to remove an old native layout.
+
+## Guided optional setup
+
+After successful base setup, **Guide optional tool setup after installation** opens a separate window. Reopen it using **Configure existing tools**, `python .agent-toolkit/manage.py setup`, or `AgentToolkitSetup.exe --configure-tools --project PATH`. Reopening does not download/export the toolkit or overwrite custom files.
+
+1. **Tools:** select project-local Strix, Spec Kit/Specify, ClawScan, Lighthouse or Graphify runtimes. Fixed publisher recipes verify archive hashes, Python wheel hashes or npm integrity; package build/lifecycle scripts are disabled. Unsupported platforms/artifacts receive manual guidance. Optional runtime upgrades are deliberate; `update` updates skills/MCP packages, not these runtimes.
+2. **Strix access:** choose Later, ChatGPT browser sign-in or an API provider/model ID. Save the choice, then explicitly start sign-in if selected. Strix owns its session; toolkit reads no token files. `session-detected` does not prove working inference. API mode additionally uses `LLM_API_KEY`.
+3. **MCP access and checks:** enter masked keys, apply them and verify managed Context7/TestSprite communication. Only initialize/tools-list requests run; changed/custom endpoints and extra servers are skipped. Process-only keys work during setup; future clients need their environment configured separately. Optional Windows user environment persistence is plaintext, off by default, preserves differing values and needs a client restart.
+
+Docker is not installed or reconfigured automatically. Its explicit check distinguishes missing CLI from unavailable daemon and links official installation guidance. Check current Windows compatibility before installing Docker Desktop. CLI version/help verification also requires an explicit button. Setup runs no tools against your application; Chrome availability and live model access need separate checks before audits/pentests.
+
+Runtimes and non-secret preferences live in ignored `.agent-toolkit/runtime/optional/`. The manifest records versions and integrity hashes. Global CLIs remain detected but unverified. Use `python .agent-toolkit/manage.py run-tool TOOL -- --help` to invoke a managed runtime explicitly without changing PATH. Optional failures do not undo successful agent/skill installation.
 
 Version `v0.2.1` includes [a model-selection prompt](prompts/select-agent-models.md) and a conditional `AGENTS.md` instruction to read it for model requests. It guides the AI's research and supported configuration changes; it does not add automatic discovery, live evaluations or active-session model switching to the executable.
 

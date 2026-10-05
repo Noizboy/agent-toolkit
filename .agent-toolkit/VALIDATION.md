@@ -66,3 +66,13 @@ Scope: a local user installs public toolkit source into an authorized project. R
 - A04:2025 and A07:2025: no new cryptography, account authentication or secret storage. Use default HTTPS certificate verification and no GitHub API credentials; retain environment-only MCP secrets. No authentication-system change or active security assessment is in scope.
 
 This evidence applies to the agent toolkit. Application builds, remote TestSprite scenarios and active security assessments were outside this change. Third-party instructions and dependencies are pinned but these checks do not certify the safety of every upstream package.
+
+## Guided optional setup v0.4.0 (2026-10-05)
+
+Security pre-review checked current official OWASP Top 10:2025, API Top 10:2023, ASVS 5.0.0 and relevant supply-chain, secrets, OAuth and MCP guidance; see [the dated assessment](plans/guided-setup-security.md). Implementation uses fixed publisher recipes, isolated project runtimes, verified artifact digests, bounded downloads/processes, explicit credential/login actions and managed-only protocol probes. Windows user environment persistence is a separate disclosed plaintext opt-in; secrets are absent from project files and reports.
+
+Independent QA and the complete local suite: **127 tests, 124 passed, three skipped for Windows symbolic-link privileges**. Actual junction, deep Windows path relocation, tampering and isolated Python import-shadow checks passed. Cases also cover existing-value preservation, session-only credentials, redaction, login cancellation, forged/custom MCP declarations/launches, malformed protocol responses, optional failure isolation and all three generated provider configurations.
+
+Actual disposable project-local installations from official publishers passed integrity validation and bounded version/help checks: Strix 1.7.0, ClawScan 0.2.0, Spec Kit/Specify 1.0.13, Graphify 0.9.77 and Lighthouse 13.5.0. Windows long-path hashing and npm-cache cleanup were corrected before final packaging. Existing global tools and user sessions were preserved. The documented Strix status command detected its existing saved session without reading token files; model access was not tested. Docker was accurately reported missing.
+
+The Python wizard and rebuilt Windows executable passed form and guided-window construction checks, explicit provider selection and credential persistence off by default. The executable was tested from another working directory. Protocol tests use controlled fixtures; installation checks do not prove client loading, browser availability, model execution or tool safety. No scans, pentests, application tests, repository uploads, Docker installation or system service changes were performed.

@@ -5,6 +5,8 @@ description: Bootstrap, inventory, update or export the repository's generic age
 
 # Project agent toolkit
 
+For explicitly requested guided tool installation/authentication, use `python .agent-toolkit/manage.py setup`. Reviewed optional runtimes are project-local and opt-in; unknown recipes receive manual guidance. Strix ChatGPT login is owned by its official CLI, with no token copying; API mode needs its own credentials. MCP probes only initialize/list tools. This setup does not authorize scans, model calls or repository uploads. Keep credentials out of project files and reports; Windows user environment persistence is a separate plaintext opt-in.
+
 Read .agent-toolkit/agents/Orchestrator.md and Agent-Contract.md. At the first substantive project task in a session, run `python .agent-toolkit/manage.py bootstrap` once, then `python .agent-toolkit/manage.py list` and show a compact status. Bootstrap is provider-neutral: native client files are generated only for the provider selected by the installer and recorded in `.agent-toolkit/project.json`. The registry defines authorized project-local skill downloads and MCP setup; ordinary bootstrap restores pinned versions and preserves unmanaged/customized installations.
 
 Do not recursively invoke this skill from its own bootstrap, a specialist or a read-only audit. A skill discovered after bootstrap may require a new turn/reload; read its SKILL.md directly if allowed rather than claiming it is already runtime-loaded.

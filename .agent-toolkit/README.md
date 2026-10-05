@@ -49,6 +49,8 @@ For HTTP MCPs, declare `mcp.transport: "http"`, an HTTPS `url` and, where applic
 
 The `command`, `requirements` and `credential_envs` fields report CLIs and prerequisites. These are presence checks; bootstrap does not execute these commands, install application dependencies, run scans or upload code or data.
 
+Run `python .agent-toolkit/manage.py setup` for guided optional CLI installation and authentication. Fixed reviewed recipes cover Strix, Spec Kit/Specify, ClawScan, Lighthouse and Graphify. A registry entry cannot supply executable installation commands; new tools need a reviewed recipe in `tool_runtime.py` or manual official guidance. `install-runtime TOOL` installs one recipe; `run-tool TOOL -- ARGS` explicitly invokes its integrity-checked project-local runtime. Global packages and PATH are preserved. Optional runtime upgrades are separate from skills/MCP `update`.
+
 ## Restoration and preservation
 
 `tools.lock.json` records Git commits, managed skill hashes, npm artifacts and generated configuration blocks. Downloaded source trees are not executed during preparation. npm dependencies are pinned under `runtime-locks/` and installed with lifecycle scripts disabled. Keep both kinds of lock in Git.

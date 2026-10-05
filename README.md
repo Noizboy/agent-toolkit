@@ -24,6 +24,14 @@ Enter the **project name**, choose its **folder**, select your **client/provider
 
 Existing instructions and custom settings are preserved; setup reports any conflicts.
 
+Keep **Guide optional tool setup after installation** enabled to continue with:
+
+- Selected project-local Strix, Spec Kit/Specify, ClawScan, Lighthouse and Graphify runtimes.
+- Strix access through its ChatGPT browser sign-in or an API provider/model.
+- Masked Context7/TestSprite keys and managed MCP connection checks.
+
+Docker stays a manual prerequisite: the guide checks its CLI and daemon and links the official installation instructions. Keys are session-only by default; optional Windows user environment storage is plaintext and requires explicit selection. No scans or model calls run during setup.
+
 ### 4. Open your AI client
 
 Open the target project, sign in to your model provider and approve its MCP servers. Reload the client if needed. Add your project's purpose and conventions to `AGENTS.md`.
@@ -45,6 +53,9 @@ Run these commands from the target project folder:
 | Command | Purpose |
 | --- | --- |
 | `python .agent-toolkit/manage.py list` | Lists agents, skills and MCP configuration; refreshes the full inventory. |
+| `python .agent-toolkit/manage.py setup` | Reopens guided optional tool installation, Strix access and MCP checks. |
+| `python .agent-toolkit/manage.py install-runtime strix` | Installs a reviewed project-local CLI; replace `strix` with `spec-kit`, `clawscan`, `lighthouse` or `graphify`. |
+| `python .agent-toolkit/manage.py run-tool strix -- --help` | Runs an installed project-local CLI explicitly; replace the tool/arguments as needed. |
 | `python .agent-toolkit/manage.py doctor` | Checks for missing files, credentials and required runtimes. |
 | `python .agent-toolkit/manage.py doctor --probe-mcp` | Checks setup and MCP communication by initializing servers and listing their tools. |
 | `python .agent-toolkit/manage.py update` | Updates registered skills/MCP packages from their declared sources, preserving customized files. |
@@ -93,4 +104,4 @@ Provide the credential variables in your environment and approve the MCPs in you
 
 </details>
 
-Skills and source adapters are prepared locally. Optional **graphify, Strix, Specify, ClawScan and Lighthouse CLI runtimes** require separate installation; Strix also requires Docker and model credentials. The optional `boneyard-js` application dependency is not added automatically. Setup does not run tests, scans or pentests.
+Skills and source adapters are prepared locally. The guided step installs selected optional CLI runtimes from their official publisher distributions, checks artifact integrity and preserves existing global tools. Strix also requires Docker and a supported model/authentication method; Lighthouse needs a supported browser for audits. Unsupported platforms or distributions receive manual guidance. The optional `boneyard-js` application dependency is not added automatically. Setup does not run tests, scans or pentests.

@@ -124,6 +124,20 @@ class Toolkit:
             runtime = "not-applicable"
             if command:
                 runtime = "command-found; execution-not-verified" if shutil.which(command) else "runtime-not-installed"
+                from tool_runtime import RECIPES, runtime_status
+                if tool['id'] in RECIPES:
+                    managed = runtime_status(self.root, tool['id'])
+                    if managed.get('status') == 'installed':
+                        runtime = 'project-runtime-installed; integrity-checked; execution-not-verified'
+                    elif managed.get('status') not in {'not-installed', 'command-detected', 'runtime-not-installed'}:
+                        runtime += '; managed-' + managed['status']
+            if tool['id'] == 'strix':
+                from setup_support import strix_settings
+                settings = strix_settings(self.root)
+                if settings['auth_mode'] == 'chatgpt':
+                    credentials = []
+                elif settings['model']:
+                    credentials = [name for name in credentials if name != 'STRIX_LLM']
             if tool.get("mcp", {}).get("transport") == "stdio":
                 entry = record.get("npm", {}).get("entrypoint")
                 runtime = "installed; protocol-not-probed" if entry and safe_path(self.root, entry).is_file() else "runtime-not-installed"
@@ -230,6 +244,17 @@ class Toolkit:
                     issues.append(tool["id"] + ": missing " + env_name)
             if tool["runtime"] == "runtime-not-installed":
                 issues.append(tool["id"] + ": CLI/MCP runtime not installed (source/skills can still be used)")
+            if '; managed-conflict' in tool['runtime']:
+                issues.append(tool['id'] + ': managed runtime modified or incomplete; preserve and review it')
+            if tool['id'] == 'strix':
+                from setup_support import strix_settings
+                from tool_runtime import strix_auth_status
+                settings = strix_settings(self.root)
+                if settings['auth_mode'] == 'chatgpt':
+                    status = strix_auth_status(self.root)
+                    print('strix: ' + status['status'] + '; model execution not verified')
+                    if status['status'] != 'session-detected':
+                        issues.append('strix: configure/check ChatGPT sign-in with manage.py setup')
             for dependency, present in tool["requirements"].items():
                 if not present:
                     issues.append(tool["id"] + ": command missing: " + dependency)
@@ -360,6 +385,13 @@ def main():
     doctor = sub.add_parser("doctor", help="Check prerequisites without running scans")
     doctor.add_argument("--probe-mcp", action="store_true", help="Initialize MCP and list tools; never run tests/scans")
     sub.add_parser("sync-agents", help="Refresh native definitions for the selected client")
+    sub.add_parser('setup', help='Open guided optional runtime/authentication/MCP setup')
+    from tool_runtime import RECIPES
+    runtime = sub.add_parser('install-runtime', help='Install one reviewed project-local optional CLI; no scans')
+    runtime.add_argument('tool', choices=list(RECIPES))
+    run = sub.add_parser('run-tool', help='Explicitly run one integrity-checked project-local optional CLI')
+    run.add_argument('tool', choices=list(RECIPES))
+    run.add_argument('args', nargs=argparse.REMAINDER)
     export = sub.add_parser("export", help="Install this toolkit in another project")
     export.add_argument("--project", dest="destination", type=Path, required=True)
     add = sub.add_parser("add", help="Extend the registry without modifying installer code")
@@ -394,6 +426,18 @@ def main():
             print("Full list: .agent-toolkit/INVENTORY.md")
     elif args.command == "doctor":
         return toolkit.doctor(args.probe_mcp)
+    elif args.command == 'setup':
+        from setup_wizard import open_setup
+        open_setup(toolkit.root)
+    elif args.command == 'install-runtime':
+        from tool_runtime import install_runtime
+        result = install_runtime(toolkit.root, args.tool)
+        print(json.dumps(result))
+        toolkit.inventory()
+        return 0 if result['status'] == 'installed' else 1
+    elif args.command == 'run-tool':
+        from tool_runtime import run_tool
+        return run_tool(toolkit.root, args.tool, args.args[1:] if args.args[:1] == ['--'] else args.args)
     elif args.command == "sync-agents":
         project = read_json(safe_path(toolkit.home, "project.json"), {})
         if project.get("provider"):
