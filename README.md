@@ -63,33 +63,49 @@ Setup prepares **31 skills and 2 MCP configurations**, using **15 registered too
 
 ### MCP servers
 
-| Server | Setup | Credential variable |
+| Server | Purpose and connection | Credential variable |
 | --- | --- | --- |
-| [Context7](https://github.com/upstash/context7) | HTTP server for current documentation | `CONTEXT7_API_KEY` |
-| [TestSprite](https://docs.testsprite.com/mcp/getting-started/installation) | Isolated npm runtime and stdio configuration for testing | `TESTSPRITE_API_KEY` |
+| [Context7](https://github.com/upstash/context7) | Retrieves current library/API documentation over HTTP | `CONTEXT7_API_KEY` |
+| [TestSprite](https://docs.testsprite.com/mcp/getting-started/installation) | Connects the AI to TestSprite's application-testing tools through a local stdio runtime | `TESTSPRITE_API_KEY` |
 
 Provide the credential variables in your environment and approve the MCPs in your selected client.
 
 <details>
-<summary>All 31 skills, grouped by source</summary>
+<summary>All 31 skills and their purpose</summary>
 
-| Source | Included skills |
+| Skill | Purpose |
 | --- | --- |
-| [Agent Toolkit](.agents/skills/agent-toolkit/SKILL.md) | `agent-toolkit` |
-| [context7](https://github.com/upstash/context7) | `context7-mcp` |
-| [cyber-neo](https://github.com/Hainrixz/cyber-neo) | `cyber-neo` |
-| [thermo-nuclear-code-quality-review](https://www.skills.sh/cursor/plugins/thermo-nuclear-code-quality-review) | `thermo-nuclear-code-quality-review` |
-| [ponytail](https://github.com/DietrichGebert/ponytail) | `ponytail`, `ponytail-audit`, `ponytail-debt`, `ponytail-gain`, `ponytail-help`, `ponytail-review` |
-| [impeccable](https://github.com/pbakaus/impeccable) | `impeccable` |
-| [ui-ux-pro-max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) | `ui-ux-pro-max` |
-| [graphify](https://github.com/Graphify-Labs/graphify) | `graphify` |
-| [design-md](https://github.com/google-labs-code/design.md) | `design-md` |
-| [strix](https://github.com/usestrix/strix) | `api-security-testing`, `application-security-testing`, `ci-security-scanning-with-strix`, `find-security-vulnerabilities-in-code`, `fix-security-vulnerabilities-with-strix`, `managed-pentesting-with-strix`, `owasp-top-10-testing`, `penetration-testing-with-strix`, `web-app-penetration-testing` |
-| [taste-skill](https://github.com/Leonxlnx/taste-skill) | `taste-skill`, `gpt-tasteskill`, `redesign-skill` |
-| [spec-kit](https://github.com/github/spec-kit) | `spec-kit` |
-| [clawscan](https://github.com/openclaw/clawscan) | `clawscan-cli` |
-| [lighthouse](https://github.com/GoogleChrome/lighthouse) | `lighthouse-verification`, `lighthouse` |
-| [boneyard](https://github.com/0xGF/boneyard) | `boneyard` |
+| [agent-toolkit](.agents/skills/agent-toolkit/SKILL.md) | Installs, inventories, updates and exports project agents and tools. |
+| [api-security-testing](https://github.com/usestrix/strix) | Tests API authorization and other vulnerabilities using Strix. |
+| [application-security-testing](https://github.com/usestrix/strix) | Selects security tests across application assets and prioritizes fixes. |
+| [boneyard](https://github.com/0xGF/boneyard) | Builds and maintains skeleton loading screens with boneyard-js. |
+| [ci-security-scanning-with-strix](https://github.com/usestrix/strix) | Adds Strix security checks to CI and pull-request workflows. |
+| [clawscan-cli](https://github.com/openclaw/clawscan) | Scans agent skills for security and supply-chain risks. |
+| [context7-mcp](https://github.com/upstash/context7) | Guides current documentation lookup through the Context7 MCP. |
+| [cyber-neo](https://github.com/Hainrixz/cyber-neo) | Audits dependencies, code, secrets and security configuration. |
+| [design-md](https://github.com/google-labs-code/design.md) | Applies and maintains visual design rules in DESIGN.md. |
+| [find-security-vulnerabilities-in-code](https://github.com/usestrix/strix) | Guides source-code security review and exploit validation with Strix. |
+| [fix-security-vulnerabilities-with-strix](https://github.com/usestrix/strix) | Remediates Strix findings and retests the affected behavior. |
+| [gpt-tasteskill](https://github.com/Leonxlnx/taste-skill) | Builds expressive interfaces with typography, layouts and GSAP motion. |
+| [graphify](https://github.com/Graphify-Labs/graphify) | Maps project files and relationships into a queryable knowledge graph. |
+| [impeccable](https://github.com/pbakaus/impeccable) | Designs, reviews and refines frontend interfaces and user experience. |
+| [lighthouse](https://github.com/GoogleChrome/lighthouse) | Measures web performance, accessibility and best practices. |
+| [lighthouse-verification](https://github.com/GoogleChrome/lighthouse) | Validates changes to Lighthouse itself, including tests and fixtures. |
+| [managed-pentesting-with-strix](https://github.com/usestrix/strix) | Runs authorized security assessments through the managed Strix Cloud platform. |
+| [owasp-top-10-testing](https://github.com/usestrix/strix) | Maps authorized Strix tests and findings to OWASP risk categories. |
+| [penetration-testing-with-strix](https://github.com/usestrix/strix) | Guides authorized Strix penetration tests across supported targets. |
+| [ponytail](https://github.com/DietrichGebert/ponytail) | Keeps implementations simple and avoids unnecessary dependencies or abstractions. |
+| [ponytail-audit](https://github.com/DietrichGebert/ponytail) | Finds unnecessary complexity across the whole repository. |
+| [ponytail-debt](https://github.com/DietrichGebert/ponytail) | Collects marked shortcuts and deferred work into a debt ledger. |
+| [ponytail-gain](https://github.com/DietrichGebert/ponytail) | Displays published Ponytail benchmark results. |
+| [ponytail-help](https://github.com/DietrichGebert/ponytail) | Explains Ponytail modes, skills and commands. |
+| [ponytail-review](https://github.com/DietrichGebert/ponytail) | Reviews code changes for overengineering and opportunities to simplify. |
+| [redesign-skill](https://github.com/Leonxlnx/taste-skill) | Improves existing interfaces while preserving their functionality. |
+| [spec-kit](https://github.com/github/spec-kit) | Defines requirements, acceptance criteria and implementation plans. |
+| [taste-skill](https://github.com/Leonxlnx/taste-skill) | Creates distinctive landing pages, portfolios and redesigns. |
+| [thermo-nuclear-code-quality-review](https://www.skills.sh/cursor/plugins/thermo-nuclear-code-quality-review) | Performs strict reviews of maintainability and code structure. |
+| [ui-ux-pro-max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) | Guides interface design, accessibility and layout across platforms. |
+| [web-app-penetration-testing](https://github.com/usestrix/strix) | Tests live web applications for exploitable security flaws with Strix. |
 
 </details>
 
