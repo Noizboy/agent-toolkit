@@ -40,15 +40,16 @@ Use `Maximum Quality` or `Economy` instead of `Balanced` if preferred. Review th
 
 ## Maintenance
 
-Run from the target project folder:
+Run these commands from the target project folder:
 
-```powershell
-python .agent-toolkit/manage.py list
-python .agent-toolkit/manage.py doctor
-python .agent-toolkit/manage.py update
-```
+| Command | Purpose |
+| --- | --- |
+| `python .agent-toolkit/manage.py list` | Lists agents, skills and MCP configuration; refreshes the full inventory. |
+| `python .agent-toolkit/manage.py doctor` | Checks for missing files, credentials and required runtimes. |
+| `python .agent-toolkit/manage.py doctor --probe-mcp` | Checks setup and MCP communication by initializing servers and listing their tools. |
+| `python .agent-toolkit/manage.py update` | Updates registered skills/MCP packages from their declared sources, preserving customized files. |
 
-These list installed tools, check setup and update registered skills/MCP tools. The full inventory is `.agent-toolkit/INVENTORY.md`. Optional audit tools have additional requirements; installation does not start scans or tests.
+Read `.agent-toolkit/INVENTORY.md` for the full inventory and `.agent-toolkit/mcp-probes.json` for connection-check results. A `verified` MCP result confirms protocol communication; client loading and model access need separate checks. Optional audit tools have additional requirements. These checks do not run application tests, scans or pentests.
 
 ## Documentation
 
