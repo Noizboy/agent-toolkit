@@ -1,0 +1,12 @@
+# BEGIN generic-agent-toolkit
+.codex/toolkit/vendor/
+.codex/toolkit/runtime/
+.codex/toolkit/inventory.json
+.codex/toolkit/mcp-probes.json
+.codex/toolkit/provider-state.json
+.codex/toolkit/installation.json
+.codex/toolkit/__pycache__/
+.codex/toolkit/tests/__pycache__/
+.codex/config.toml
+# Downloaded skill ignores are generated per managed name in .agents/skills/.gitignore.
+# END generic-agent-toolkit

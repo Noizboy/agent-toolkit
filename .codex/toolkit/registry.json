@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "tools": [
+    {"id":"context7","type":"mcp","docs":"https://github.com/upstash/context7","adapter":"context7-mcp","mcp":{"transport":"http","url":"https://mcp.context7.com/mcp","credential_env":"CONTEXT7_API_KEY"}},
+    {"id":"cyber-neo","type":"skill","repo":"Hainrixz/cyber-neo","ref":"main","skills":["skills/cyber-neo"],"docs":"https://github.com/Hainrixz/cyber-neo"},
+    {"id":"thermo-nuclear-code-quality-review","type":"skill","repo":"cursor/plugins","ref":"main","skills":["cursor-team-kit/skills/thermo-nuclear-code-quality-review"],"docs":"https://www.skills.sh/cursor/plugins/thermo-nuclear-code-quality-review"},
+    {"id":"ponytail","type":"skill","repo":"DietrichGebert/ponytail","ref":"main","skills":["skills/ponytail*"],"docs":"https://github.com/DietrichGebert/ponytail"},
+    {"id":"impeccable","type":"skill","repo":"pbakaus/impeccable","ref":"main","skills":[".agents/skills/impeccable"],"docs":"https://github.com/pbakaus/impeccable","notes":"Skills only; upstream hooks and binary downloads are not run during bootstrap."},
+    {"id":"ui-ux-pro-max","type":"skill","repo":"nextlevelbuilder/ui-ux-pro-max-skill","ref":"main","skills":[".claude/skills/ui-ux-pro-max"],"docs":"https://github.com/nextlevelbuilder/ui-ux-pro-max-skill"},
+    {"id":"graphify","type":"skill+cli","repo":"Graphify-Labs/graphify","ref":"v8","payloads":[{"name":"graphify","files":{"graphify/skill-codex.md":"SKILL.md","graphify/skills/codex/references":"references"}}],"command":"graphify","docs":"https://github.com/Graphify-Labs/graphify","notes":"CLI runtime separate from skill; AST-only updates. Do not install hooks automatically."},
+    {"id":"testsprite","type":"mcp","docs":"https://docs.testsprite.com/mcp/getting-started/installation","mcp":{"transport":"stdio","package":"@testsprite/testsprite-mcp","version":"0.0.46","credential_env":"TESTSPRITE_API_KEY","server_env":"API_KEY"},"notes":"Bootstrap installs an isolated npm runtime without lifecycle scripts; it never starts a test run."},
+    {"id":"design-md","type":"adapter+source","repo":"google-labs-code/design.md","ref":"main","adapter":"design-md","docs":"https://github.com/google-labs-code/design.md","notes":"DESIGN.md format adapter; upstream contributor skills are not the design workflow."},
+    {"id":"strix","type":"skill+cli","repo":"usestrix/strix","ref":"main","skills":["skills/*"],"command":"strix","requirements":["docker"],"credential_envs":["STRIX_LLM","LLM_API_KEY"],"docs":"https://github.com/usestrix/strix","notes":"Active pentesting only on explicitly authorized targets. Docker and CLI runtime required."},
+    {"id":"taste-skill","type":"skill","repo":"Leonxlnx/taste-skill","ref":"main","skills":["skills/taste-skill","skills/gpt-tasteskill","skills/redesign-skill"],"docs":"https://github.com/Leonxlnx/taste-skill"},
+    {"id":"spec-kit","type":"adapter+source","repo":"github/spec-kit","ref":"main","adapter":"spec-kit","command":"specify","docs":"https://github.com/github/spec-kit","notes":"Specification/templates available locally; CLI initialization is separate and preserves existing project context."},
+    {"id":"clawscan","type":"skill+cli","repo":"openclaw/clawscan","ref":"main","skills":["skills/clawscan-cli"],"command":"clawscan","docs":"https://github.com/openclaw/clawscan","notes":"Skill supply-chain scan; readiness depends on the selected scanner and runtime."},
+    {"id":"lighthouse","type":"skill+cli","repo":"GoogleChrome/lighthouse","ref":"main","skills":[".agents/skills/lighthouse-verification"],"adapter":"lighthouse","command":"lighthouse","docs":"https://github.com/GoogleChrome/lighthouse","notes":"Web-only audits require Chrome and an authorized running URL; CLI runtime is separate."},
+    {"id":"boneyard","type":"skill+source","repo":"0xGF/boneyard","ref":"main","skills":[".claude/skills/boneyard"],"docs":"https://github.com/0xGF/boneyard","notes":"Optional skeleton-loading library boneyard-js; no application dependency is added by bootstrap."}
+  ]
+}

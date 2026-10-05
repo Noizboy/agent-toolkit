@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "tools": {
+    "context7": {},
+    "cyber-neo": {
+      "source": "Hainrixz/cyber-neo@main",
+      "commit": "dcac0a8f111954e543e1e66e02a222c0c489ca74"
+    },
+    "thermo-nuclear-code-quality-review": {
+      "source": "cursor/plugins@main",
+      "commit": "00b52d954a99ff67802cad428ff19218659f76fd"
+    },
+    "ponytail": {
+      "source": "DietrichGebert/ponytail@main",
+      "commit": "cd765194f5e625d2f96e80e63df1c1af0b03705b"
+    },
+    "impeccable": {
+      "source": "pbakaus/impeccable@main",
+      "commit": "ece38d9904b8a619b3f77cab476eacad09c4fb11"
+    },
+    "ui-ux-pro-max": {
+      "source": "nextlevelbuilder/ui-ux-pro-max-skill@main",
+      "commit": "477bcb28c9812b385cb51a4605ddf30d7b2266e2"
+    },
+    "graphify": {
+      "source": "Graphify-Labs/graphify@v8",
+      "commit": "35adf432b9d50f6f3d530ab5d7ec316819ef081c"
+    },
+    "testsprite": {
+      "npm": {
+        "package": "@testsprite/testsprite-mcp",
+        "version": "0.0.46",
+        "integrity": "sha512-gpK1P1Lb7B01Hwku79pF3FhWgOgNfeNofSycOu4W966N3h4MiLl8PyNx4VHTcPLwk1uZcDN4fDnwIhavLjJBZQ=="
+      }
+    },
+    "design-md": {
+      "source": "google-labs-code/design.md@main",
+      "commit": "9bf8eae67128b6cc55ad9bf86665767deb4c11cd"
+    },
+    "strix": {
+      "source": "usestrix/strix@main",
+      "commit": "55bc07991aacb1c26a81b43e7ca53148730d2019"
+    },
+    "taste-skill": {
+      "source": "Leonxlnx/taste-skill@main",
+      "commit": "ce26fc25c0e5e8cab638f883de62d9a86ee5e45b"
+    },
+    "spec-kit": {
+      "source": "github/spec-kit@main",
+      "commit": "5364d7ce6ecaedbaac6caf847541465927eb93c2"
+    },
+    "clawscan": {
+      "source": "openclaw/clawscan@main",
+      "commit": "490bd167ea431697ac42f566adb06281db53c720"
+    },
+    "lighthouse": {
+      "source": "GoogleChrome/lighthouse@main",
+      "commit": "db0f40a444a53c6edacc120eb917beceabc00401"
+    },
+    "boneyard": {
+      "source": "0xGF/boneyard@main",
+      "commit": "b7597f527aa641a84c8432230e7a874b66f1ba40"
+    }
+  }
+}
