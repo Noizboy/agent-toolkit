@@ -11,11 +11,3 @@
 .codex/config.toml
 # Downloaded skill ignores are generated per managed name in .agents/skills/.gitignore.
 # END generic-agent-toolkit
-
-.agent-toolkit/.build-venv/
-.agent-toolkit/installer-build/
-.agent-toolkit/installer-dist/
-**/__pycache__/
-*.env
-.env
-.agents/skills/.gitignore
