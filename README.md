@@ -4,7 +4,7 @@ A reusable, provider-neutral agent team, project-local skills/MCP manager and Wi
 
 Download **AgentToolkitSetup.exe** from the [latest release](https://github.com/Noizboy/agent-toolkit/releases/latest), then double-click it. Enter the project name, description, target folder and the client/provider environment to use: ChatGPT/Codex, Anthropic/Claude Code or OpenCode. The installer records the initial provider and model mapping. Explicit model-selection requests can subsequently update supported project model settings through the reusable prompt and synchronization command.
 
-Git, Python 3.11+ and Node.js/npm are required. For this private repository, authenticate with GitHub CLI using `gh auth login` before downloading/installing. Credentials remain in the environment or keychain and are never copied into the toolkit.
+Git, Python 3.11+ and Node.js/npm are required. This repository is public; downloading the release and default toolkit source does not require GitHub sign-in. Private alternate sources require GitHub CLI authentication with `gh auth login`. Credentials remain in the environment or keychain and are never copied into the toolkit.
 
 ## Repository layout
 
@@ -26,6 +26,18 @@ An uninstalled checkout has no provider-native `.codex/`, `.claude/` or `.openco
 - [Editable tool registry](.agent-toolkit/registry.json)
 - [Security policy](.agent-toolkit/agents/Security-Policy.md)
 - [Prompt for choosing agent models](.agent-toolkit/prompts/select-agent-models.md)
+
+## Prompt to assign agent models
+
+After installation, open the target project in your selected AI client and paste this prompt:
+
+```text
+Read .agent-toolkit/prompts/select-agent-models.md and apply the most suitable currently available models for this project's agents using the Balanced profile. Consult current official sources, verify model identifiers and availability for the selected client and underlying provider, and justify the assignments. Use the model tiers and configuration supported by this toolkit, preserve custom configuration, and keep the selected provider. Record the evidence and any availability limitations in AGENT-MODEL-SELECTION.md, apply supported settings, and synchronize the generated agents. Respond in the language I use in this conversation.
+```
+
+Replace `Balanced` with `Maximum Quality` or `Economy` to change the selection priorities. The AI reads the detailed instructions, researches available models and can update `.agent-toolkit/project.json` and supported tier mappings. The current adapter uses provider-wide strong, light and escalation settings; it does not support arbitrary model overrides for every role.
+
+Review the resulting `AGENT-MODEL-SELECTION.md`, then reload the selected client if needed. This request authorizes supported configuration changes; it does not authorize paid evaluation calls or switch the active chat model. A documented model assignment alone does not prove account access or a successful inference.
 
 ## Install from a checkout
 

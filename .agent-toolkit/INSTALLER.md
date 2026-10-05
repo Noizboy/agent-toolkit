@@ -18,7 +18,7 @@ No client is preselected in the form; scripted setup requires `--provider`. Afte
 
 OpenCode is a client: select IDs actually exposed by the authenticated underlying provider. These mappings are configuration, not evidence that a provider currently exposes a particular model.
 
-The repository default is `Noizboy/agent-toolkit`, release `v0.2.1`. You can enter a GitHub repository and an explicit tag, branch or commit. The installer records the resolved commit in the project installation report. Private repository downloads use GitHub CLI authentication: install `gh`, run `gh auth login`, then reopen the installer. Credentials are never requested in the form or written into project files.
+The repository default is the public `Noizboy/agent-toolkit`, release `v0.2.1`; downloading this source requires no GitHub sign-in. You can enter a GitHub repository and an explicit tag, branch or commit. The installer records the resolved commit in the project installation report. Private repository downloads use GitHub CLI authentication: install `gh`, run `gh auth login`, then reopen the installer. Credentials are never requested in the form or written into project files.
 
 ## Requirements and results
 
