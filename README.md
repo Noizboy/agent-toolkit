@@ -23,12 +23,12 @@ The Windows executable includes its setup UI runtime, but Python is still requir
 
 ### 2. Start setup
 
-**Windows executable:** download **AgentToolkitSetup.exe** from the [latest release](https://github.com/Noizboy/agent-toolkit/releases/latest) and double-click it.
+**Windows executable:** double-click **AgentToolkitSetup.exe** in the repository root. If you only need the executable, download it from the [latest release](https://github.com/Noizboy/agent-toolkit/releases/latest).
 
 **Python installer:** if you already downloaded or cloned this repository, open a terminal in its extracted root folder and run:
 
 ```powershell
-python .agent-toolkit/installer.py
+python installer.py
 ```
 
 Both launch the same simplified wizard and download the latest published stable release from this repository. There is no repository, version or project-description input. Choose a target project folder outside the downloaded toolkit checkout.
@@ -55,7 +55,19 @@ The full skills/MCP inventory is `.agent-toolkit/INVENTORY.md`. Setup details, t
 
 ### 5. Select models and update tools
 
-Paste the **Prompt to assign agent models** below into the AI after setup. To update registered upstream skills/MCP tools later, run:
+#### Prompt to assign agent models
+
+After installation, open the target project in your selected AI client and paste this prompt:
+
+```text
+Read .agent-toolkit/prompts/select-agent-models.md and apply the most suitable currently available models for this project's agents using the Balanced profile. Consult current official sources, verify model identifiers and availability for the selected client and underlying provider, and justify the assignments. Use the model tiers and configuration supported by this toolkit, preserve custom configuration, and keep the selected provider. Record the evidence and any availability limitations in AGENT-MODEL-SELECTION.md, apply supported settings, and synchronize the generated agents. Respond in the language I use in this conversation.
+```
+
+Replace `Balanced` with `Maximum Quality` or `Economy` to change the selection priorities. The AI reads the detailed instructions, researches available models and can update `.agent-toolkit/project.json` and supported tier mappings. The current adapter uses provider-wide strong, light and escalation settings; it does not support arbitrary model overrides for every role.
+
+Review the resulting `AGENT-MODEL-SELECTION.md`, then reload the selected client if needed. This request authorizes supported configuration changes; it does not authorize paid evaluation calls or switch the active chat model. A documented model assignment alone does not prove account access or a successful inference.
+
+To update registered upstream skills/MCP tools later, run:
 
 ```powershell
 python .agent-toolkit/manage.py update
@@ -84,29 +96,17 @@ An uninstalled checkout has no provider-native `.codex/`, `.claude/` or `.openco
 - [Security policy](.agent-toolkit/agents/Security-Policy.md)
 - [Prompt for choosing agent models](.agent-toolkit/prompts/select-agent-models.md)
 
-## Prompt to assign agent models
-
-After installation, open the target project in your selected AI client and paste this prompt:
-
-```text
-Read .agent-toolkit/prompts/select-agent-models.md and apply the most suitable currently available models for this project's agents using the Balanced profile. Consult current official sources, verify model identifiers and availability for the selected client and underlying provider, and justify the assignments. Use the model tiers and configuration supported by this toolkit, preserve custom configuration, and keep the selected provider. Record the evidence and any availability limitations in AGENT-MODEL-SELECTION.md, apply supported settings, and synchronize the generated agents. Respond in the language I use in this conversation.
-```
-
-Replace `Balanced` with `Maximum Quality` or `Economy` to change the selection priorities. The AI reads the detailed instructions, researches available models and can update `.agent-toolkit/project.json` and supported tier mappings. The current adapter uses provider-wide strong, light and escalation settings; it does not support arbitrary model overrides for every role.
-
-Review the resulting `AGENT-MODEL-SELECTION.md`, then reload the selected client if needed. This request authorizes supported configuration changes; it does not authorize paid evaluation calls or switch the active chat model. A documented model assignment alone does not prove account access or a successful inference.
-
 ## Install without the wizard
 
 ```text
-python .agent-toolkit/installer.py --install --project "C:/Projects/MyProject" --name "MyProject" --provider claude
+python installer.py --install --project "C:/Projects/MyProject" --name "MyProject" --provider claude
 ```
 
 Use `--provider codex`, `claude` or `opencode`. Scripted installation also downloads the latest stable release and requires no description, repository or version arguments.
 
 `bootstrap` and `sync-agents` use the provider recorded in `.agent-toolkit/project.json`. They do not infer a default provider from the canonical cards. Model tiers are mapped to the selected provider's configured strong, light and escalation models; generated native files do not change the primary chat model automatically.
 
-The current release is **v0.3.0**, with the simplified latest-release installer and reusable model-selection prompt. The v0.1.0 layout additionally needs a project migration to the neutral shared directory.
+The current release is **v0.3.1**, with root-level Windows/Python installers and the model-selection prompt directly in tutorial step 5. The v0.1.0 layout additionally needs a project migration to the neutral shared directory.
 
 There are 13 roles and 15 registered tool sources. Optional audit CLIs have separate runtime prerequisites; setup does not execute audits, tests, scans or pentests. Before security-sensitive implementation, agents consult current official OWASP guidance and record controls and verification evidence.
 

@@ -1,6 +1,6 @@
 # Windows project installer
 
-Double-click **AgentToolkitSetup.exe**, or run `python .agent-toolkit/installer.py` from a downloaded checkout. Enter only the project name, target folder and client/provider environment:
+Double-click **AgentToolkitSetup.exe** in the repository root, or run `python installer.py` from a downloaded checkout. The executable is also available in GitHub releases. Enter only the project name, target folder and client/provider environment:
 
 - **ChatGPT / Codex**: generates `.codex/agents/` and `.codex/config.toml` from the canonical cards and selected model settings.
 - **Anthropic / Claude Code**: generates `.claude/agents/`, `.claude/skills/`, `CLAUDE.md` and `.mcp.json`.
@@ -30,7 +30,7 @@ An uninstalled checkout contains the canonical `.agent-toolkit/` and shared `.ag
 
 ## Updating an existing project
 
-The current source release is `v0.3.0`. Each installer run downloads the latest stable release automatically. Projects installed from older toolkit revisions are not automatically deleted or overwritten. Review reported source/routing collisions, preserve custom files and merge deliberately. The `v0.1.0` layout additionally requires a deliberate migration to the neutral shared directory. Do not treat a clean source download as permission to remove an old native layout.
+The current source release is `v0.3.1`. Each installer run downloads the latest stable release automatically. Projects installed from older toolkit revisions are not automatically deleted or overwritten. Review reported source/routing collisions, preserve custom files and merge deliberately. The `v0.1.0` layout additionally requires a deliberate migration to the neutral shared directory. Do not treat a clean source download as permission to remove an old native layout.
 
 Version `v0.2.1` includes [a model-selection prompt](prompts/select-agent-models.md) and a conditional `AGENTS.md` instruction to read it for model requests. It guides the AI's research and supported configuration changes; it does not add automatic discovery, live evaluations or active-session model switching to the executable.
 
@@ -54,7 +54,7 @@ python -m venv .agent-toolkit/.build-venv
 .agent-toolkit/.build-venv/Scripts/python.exe .agent-toolkit/build_installer.py
 ```
 
-Output: `.agent-toolkit/installer-dist/AgentToolkitSetup.exe`. Build artifacts and the virtual environment are ignored. Publish the executable and its SHA-256 checksum as release assets. The executable is unsigned; it does not request administrator privileges.
+Output: `AgentToolkitSetup.exe` and `SHA256SUMS.txt` in the repository root. Intermediate build files and the virtual environment are ignored; the root executable/checksum are published with the source and as release assets. The executable is unsigned; it does not request administrator privileges.
 
 For scripted setup, use the executable or Python source with `--install --project PATH --name NAME --provider codex|claude|opencode`. It also downloads the latest stable release; source overrides and description arguments are not supported. Exit status is nonzero for unresolved issues. `--self-test RESULT.json` verifies the packaged setup form without installation.
 

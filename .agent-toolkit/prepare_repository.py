@@ -43,6 +43,10 @@ def prepare(source: Path, destination: Path):
     ignores += "\n.agent-toolkit/.build-venv/\n.agent-toolkit/installer-build/\n.agent-toolkit/installer-dist/\n**/__pycache__/\n*.env\n.env\n"
     (destination / ".gitignore").write_text(ignores, encoding="utf-8")
     shutil.copy2(source / "README.md", destination / "README.md")
+    for name in ["installer.py", "AgentToolkitSetup.exe", "SHA256SUMS.txt"]:
+        entry = safe_path(source, name)
+        if entry.is_file():
+            shutil.copy2(entry, safe_path(destination, name))
     return destination
 
 
