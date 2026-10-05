@@ -185,6 +185,12 @@ def main():
             root.update_idletasks()
             if len(guided.selected)!=5 or guided.persist.get():
                 raise RuntimeError('Guided tools/credential consent controls failed')
+            for mode,model,expected in [('chatgpt','chatgpt/example','Not needed'),
+                                        ('api','openrouter/anthropic/example','OpenRouter'),
+                                        ('later','','Only for Strix API mode')]:
+                guided.mode.set(mode);guided.model.set(model)
+                if expected not in guided.llm_help.get():
+                    raise RuntimeError('Strix API key guidance does not match authentication choice')
             guided.window.destroy()
         args.self_test.write_text(json.dumps({"status":"passed","simplified_form":True,"guided_tools":hasattr(wizard,"guide"),"guided_window_constructed":True,"latest_stable_release":True,"provider_selection_required":True,"providers":list(PROVIDERS),"tk_version":tk.TkVersion}),encoding="utf-8")
         root.destroy();return 0

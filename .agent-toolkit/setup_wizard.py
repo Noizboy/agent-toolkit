@@ -52,8 +52,8 @@ class ToolsWizard:
             raise ValueError('Install the toolkit and select a provider first')
         self.window = tk.Toplevel(parent)
         self.window.title('Agent Toolkit — guided tool setup')
-        self.window.geometry('820x650')
-        self.window.minsize(730, 590)
+        self.window.geometry('820x700')
+        self.window.minsize(730, 640)
         self.events = queue.Queue()
         self.running = False
         self.login_child = None
@@ -99,12 +99,25 @@ class ToolsWizard:
         ttk.Label(auth, text='Install the Strix runtime in step 1 before signing in. API mode uses LLM_API_KEY\nin step 3. Strix keeps its own login session; the toolkit never reads its token files.').pack(anchor='w', pady=8)
         self.credentials = {}
         ttk.Label(mcps, text='Keys are masked and never written to project files or logs.\nBlank entries keep the existing environment. Session-only is the default.').pack(anchor='w', pady=8)
-        for name in ['CONTEXT7_API_KEY', 'TESTSPRITE_API_KEY', 'LLM_API_KEY']:
-            label = name + (' — already present' if os.environ.get(name) else ' — missing')
-            ttk.Label(mcps, text=label).pack(anchor='w')
+        labels = {'CONTEXT7_API_KEY': 'Context7 documentation API key',
+                  'TESTSPRITE_API_KEY': 'TestSprite testing API key',
+                  'LLM_API_KEY': 'Strix AI provider API key'}
+        for name, title in labels.items():
+            label = title + ' (' + name + ')' + (' — already present' if os.environ.get(name) else ' — missing')
+            if name == 'LLM_API_KEY':
+                self.llm_label = tk.StringVar(value=label)
+                ttk.Label(mcps, textvariable=self.llm_label).pack(anchor='w')
+            else:
+                ttk.Label(mcps, text=label).pack(anchor='w')
             variable = tk.StringVar()
             self.credentials[name] = variable
             ttk.Entry(mcps, textvariable=variable, show='•').pack(fill='x', pady=(0, 4))
+            if name == 'LLM_API_KEY':
+                self.llm_help = tk.StringVar()
+                ttk.Label(mcps, textvariable=self.llm_help, wraplength=680).pack(anchor='w', pady=(0, 4))
+        self.mode.trace_add('write', lambda *_: self.update_llm_help())
+        self.model.trace_add('write', lambda *_: self.update_llm_help())
+        self.update_llm_help()
         self.persist = tk.BooleanVar(value=False)
         ttk.Checkbutton(mcps, text='Save entered keys to my Windows user environment (optional)', variable=self.persist).pack(anchor='w', pady=4)
         ttk.Label(mcps, text='This stores plaintext outside the project, accessible to your user and future processes.\nExisting different user values are preserved. Restart the client after saving.\nWithout this option, keys apply only to this setup session; configure future clients separately.').pack(anchor='w')
@@ -113,7 +126,7 @@ class ToolsWizard:
         ttk.Label(mcps, text='Checks initialize Context7/TestSprite and list tools only. Custom MCPs are skipped.\nApprove servers and reload your AI client separately; a probe does not load this chat.').pack(anchor='w', pady=8)
         self.status = tk.StringVar(value='Choose tools or check existing setup')
         ttk.Label(frame, textvariable=self.status).pack(anchor='w', pady=(10, 0))
-        self.output = tk.Text(frame, height=6, state='disabled', wrap='word', font=('Consolas', 9))
+        self.output = tk.Text(frame, height=4, state='disabled', wrap='word', font=('Consolas', 9))
         self.output.pack(fill='x', pady=6)
         self.action(frame, 'Refresh setup summary', self.summary)
         ttk.Button(frame, text='Close', command=self.close).pack(anchor='e')
@@ -179,6 +192,22 @@ class ToolsWizard:
             self.model.set('chatgpt/gpt-6.1-sol')
         elif self.mode.get() == 'api' and self.model.get().startswith('chatgpt/'):
             self.model.set('')
+
+    def update_llm_help(self):
+        if self.mode.get() == 'chatgpt':
+            text = 'Not needed for ChatGPT sign-in. Leave this field blank; Strix uses the session from step 2.'
+            state = 'not needed for ChatGPT sign-in'
+        elif self.mode.get() == 'api' and '/' in self.model.get():
+            provider = self.model.get().split('/', 1)[0].lower()
+            title = {'openai': 'OpenAI', 'anthropic': 'Anthropic', 'openrouter': 'OpenRouter',
+                     'gemini': 'Google AI Studio'}.get(provider, 'the provider selected in step 2')
+            text = 'Paste your API key from ' + title + ' for Strix. Use the same provider as the model in step 2.'
+            state = 'already present' if os.environ.get('LLM_API_KEY') else 'missing'
+        else:
+            text = 'Only for Strix API mode: use the API key from the provider/model chosen in step 2\n(e.g. OpenAI, Anthropic or OpenRouter). ChatGPT sign-in does not need this key.'
+            state = ('already present' if os.environ.get('LLM_API_KEY') else 'missing') if self.mode.get() == 'api' else 'optional; configure step 2 first'
+        self.llm_label.set('Strix AI provider API key (LLM_API_KEY) — ' + state)
+        self.llm_help.set(text)
 
     def login(self):
         if self.mode.get() != 'chatgpt':

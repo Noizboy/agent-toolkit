@@ -30,7 +30,7 @@ An uninstalled checkout contains the canonical `.agent-toolkit/` and shared `.ag
 
 ## Updating an existing project
 
-The current source release is `v0.4.0`. Each installer run downloads the latest stable release automatically. Projects installed from older toolkit revisions are not automatically deleted or overwritten. Review reported source/routing collisions, preserve custom files and merge deliberately. The `v0.1.0` layout additionally requires a deliberate migration to the neutral shared directory. Do not treat a clean source download as permission to remove an old native layout.
+The current source release is `v0.4.1`. Each installer run downloads the latest stable release automatically. Projects installed from older toolkit revisions are not automatically deleted or overwritten. Review reported source/routing collisions, preserve custom files and merge deliberately. The `v0.1.0` layout additionally requires a deliberate migration to the neutral shared directory. Do not treat a clean source download as permission to remove an old native layout.
 
 ## Guided optional setup
 
@@ -39,6 +39,8 @@ After successful base setup, **Guide optional tool setup after installation** op
 1. **Tools:** select project-local Strix, Spec Kit/Specify, ClawScan, Lighthouse or Graphify runtimes. Fixed publisher recipes verify archive hashes, Python wheel hashes or npm integrity; package build/lifecycle scripts are disabled. Unsupported platforms/artifacts receive manual guidance. Optional runtime upgrades are deliberate; `update` updates skills/MCP packages, not these runtimes.
 2. **Strix access:** choose Later, ChatGPT browser sign-in or an API provider/model ID. Save the choice, then explicitly start sign-in if selected. Strix owns its session; toolkit reads no token files. `session-detected` does not prove working inference. API mode additionally uses `LLM_API_KEY`.
 3. **MCP access and checks:** enter masked keys, apply them and verify managed Context7/TestSprite communication. Only initialize/tools-list requests run; changed/custom endpoints and extra servers are skipped. Process-only keys work during setup; future clients need their environment configured separately. Optional Windows user environment persistence is plaintext, off by default, preserves differing values and needs a client restart.
+
+Credential fields identify their service. `CONTEXT7_API_KEY` belongs to Context7 documentation; `TESTSPRITE_API_KEY` belongs to TestSprite testing. `LLM_API_KEY` is the AI provider key used by **Strix in API mode**: obtain it from the same provider as the model selected in step 2 (for example, an `openrouter/...` model uses an OpenRouter API key). With **ChatGPT sign-in**, leave `LLM_API_KEY` blank; Strix uses its saved sign-in session. Help beside the field follows the current authentication/model choice.
 
 Docker is not installed or reconfigured automatically. Its explicit check distinguishes missing CLI from unavailable daemon and links official installation guidance. Check current Windows compatibility before installing Docker Desktop. CLI version/help verification also requires an explicit button. Setup runs no tools against your application; Chrome availability and live model access need separate checks before audits/pentests.
 
