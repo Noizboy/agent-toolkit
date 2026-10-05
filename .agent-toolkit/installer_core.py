@@ -1,7 +1,7 @@
 """Download the toolkit and install it into a selected project without running remote Python."""
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import json
 import os
 from pathlib import Path
@@ -9,6 +9,8 @@ import re
 import shutil
 import subprocess
 import tempfile
+from urllib.error import URLError
+from urllib.request import Request, urlopen
 
 from manage import Toolkit, appended_content
 from configuration import toml_data
@@ -16,7 +18,6 @@ from providers import configure_provider
 from sources import atomic_text, read_json, safe_path, save_json
 
 DEFAULT_REPOSITORY = "Noizboy/agent-toolkit"
-DEFAULT_REF = "v0.2.1"
 PROVIDERS = {"ChatGPT / Codex": "codex", "Anthropic / Claude Code": "claude", "OpenCode": "opencode"}
 
 
@@ -33,8 +34,8 @@ class Project:
     def validate(self):
         if not self.name.strip() or len(self.name) > 100 or any(ord(c) < 32 for c in self.name):
             raise ValueError("Enter a project name between 1 and 100 characters, without control characters.")
-        if not self.description.strip() or len(self.description) > 5000 or "\x00" in self.description:
-            raise ValueError("Enter a project description between 1 and 5000 characters.")
+        if len(self.description) > 5000 or "\x00" in self.description:
+            raise ValueError("Project description must be at most 5000 characters, without null characters.")
         if self.provider not in PROVIDERS.values():
             raise ValueError("Choose ChatGPT / Codex, Claude Code or OpenCode.")
         destination = self.destination.absolute()
@@ -75,6 +76,28 @@ def prerequisites() -> list[str]:
     return missing
 
 
+def latest_release() -> str:
+    """Resolve the fixed public repository's latest published stable release."""
+    request = Request(f"https://api.github.com/repos/{DEFAULT_REPOSITORY}/releases/latest",
+                      headers={"Accept": "application/vnd.github+json", "User-Agent": "AgentToolkitSetup"})
+    try:
+        with urlopen(request, timeout=20) as response:
+            data = response.read(1024 * 1024 + 1)
+        if len(data) > 1024 * 1024:
+            raise ValueError("Release metadata exceeds the size limit.")
+        release = json.loads(data)
+    except (URLError, OSError, ValueError) as error:
+        raise RuntimeError("Could not determine the latest stable release. Check your connection or GitHub availability and retry.") from error
+    if not isinstance(release, dict):
+        raise RuntimeError("GitHub did not return valid release metadata.")
+    tag = release.get("tag_name")
+    if (release.get("draft") is not False or release.get("prerelease") is not False
+            or not isinstance(tag, str) or len(tag) > 120
+            or not re.fullmatch(r"[A-Za-z0-9_][A-Za-z0-9_./+-]*", tag) or ".." in tag):
+        raise RuntimeError("GitHub did not return a valid published stable release. Retry after a stable release is available.")
+    return tag
+
+
 def download(repository: str, ref: str, temporary: Path) -> tuple[Path, str]:
     """Use a bounded Git checkout; credentials stay in the user's GitHub CLI keychain."""
     repository = repository_name(repository)
@@ -92,7 +115,7 @@ def download(repository: str, ref: str, temporary: Path) -> tuple[Path, str]:
                                 text=True, timeout=240,
                                 creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
         if result.returncode:
-            raise RuntimeError("Repository download failed. Check the repository/version and network; for a private repository, run gh auth login first.")
+            raise RuntimeError("Toolkit download failed. Check your connection and GitHub availability, then retry.")
         return result.stdout.strip()
     run("init")
     run("remote", "add", "origin", f"https://github.com/{repository}.git")
@@ -115,7 +138,7 @@ def project_context(metadata: dict) -> str:
             f"```json\n{data}\n```\n<!-- END agent-toolkit-project -->\n")
 
 
-def install(source: Path, project: Project, *, origin="local", revision="local", log=print) -> dict:
+def install(source: Path, project: Project, *, origin="local", revision="local", release=None, log=print) -> dict:
     project.validate()
     source = source.resolve()
     destination = project.destination.absolute()
@@ -126,9 +149,14 @@ def install(source: Path, project: Project, *, origin="local", revision="local",
     for name in ["Orchestrator.md", "Agent-Contract.md", "Security-Policy.md"]:
         if not safe_path(source, ".agent-toolkit/agents/" + name).is_file():
             raise ValueError("The repository is missing required agent documents.")
-    metadata = {**project.metadata(), "repository": origin, "revision": revision}
     metadata_path = safe_path(destination, ".agent-toolkit/project.json")
     existing = read_json(metadata_path, {})
+    if existing and not project.description and isinstance(existing.get("description"), str):
+        project = replace(project, description=existing["description"])
+        project.validate()
+    metadata = {**project.metadata(), "repository": origin, "revision": revision}
+    if release is not None:
+        metadata["release"] = release
     if existing and any(existing.get(key) != metadata[key] for key in project.metadata()):
         raise ValueError("This project already has different installer settings. Edit project.json deliberately instead of overwriting it.")
     agents_path = safe_path(destination, "AGENTS.md")
@@ -155,7 +183,7 @@ def install(source: Path, project: Project, *, origin="local", revision="local",
     except (OSError, ValueError, KeyError, RuntimeError) as error:
         # Export can have copied files before an environment failure. Never leave that as an unexplained success.
         report = {"status": "incomplete", "project": metadata["name"], "provider": project.provider,
-                  "destination": str(destination), "revision": revision,
+                  "destination": str(destination), "revision": revision, "release": release,
                   "issues": ["Toolkit export stopped: " + type(error).__name__],
                   "runtime_loading": "Not verified; inspect the existing configuration and retry."}
         save_json(safe_path(destination, ".agent-toolkit/installation.json"), report)
@@ -170,7 +198,7 @@ def install(source: Path, project: Project, *, origin="local", revision="local",
     missing = [tool["id"] for tool in inventory["tools"] if tool["runtime"] == "runtime-not-installed"]
     credentials = sorted({key for tool in inventory["tools"] for key, present in tool["credentials"].items() if not present})
     report = {"status": "incomplete" if issues else "installed", "project": metadata["name"],
-              "provider": project.provider, "destination": str(destination), "revision": revision,
+              "provider": project.provider, "destination": str(destination), "revision": revision, "release": release,
               "agents": len(inventory["agents"]), "project_skills": sum(s["scope"] == "project" for s in inventory["skills"]),
               "issues": issues, "optional_runtimes_missing": missing, "credential_variables_missing": credentials,
               "runtime_loading": "Restart the selected client; sign in and approve project MCPs. No client or model call was tested."}
@@ -179,13 +207,15 @@ def install(source: Path, project: Project, *, origin="local", revision="local",
     return report
 
 
-def install_from_repository(project: Project, repository=DEFAULT_REPOSITORY, ref=DEFAULT_REF, log=print):
+def install_from_repository(project: Project, log=print):
     project.validate()
     missing = prerequisites()
     if missing:
         raise RuntimeError("Install these prerequisites first: " + ", ".join(missing))
+    log("Checking the latest stable Agent Toolkit release...")
+    tag = latest_release()
     with tempfile.TemporaryDirectory(prefix="agent-toolkit-installer-") as temporary:
-        log("Downloading " + repository_name(repository) + " at " + ref + "...")
-        source, revision = download(repository, ref, Path(temporary))
+        log("Downloading Agent Toolkit " + tag + "...")
+        source, revision = download(DEFAULT_REPOSITORY, "refs/tags/" + tag, Path(temporary))
         log("Downloaded revision " + revision[:12] + ".")
-        return install(source, project, origin=repository_name(repository), revision=revision, log=log)
+        return install(source, project, origin=DEFAULT_REPOSITORY, revision=revision, release=tag, log=log)

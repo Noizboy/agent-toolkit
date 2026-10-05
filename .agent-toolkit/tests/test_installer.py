@@ -1,13 +1,16 @@
 import json
+import io
 import subprocess
 from pathlib import Path
 import sys
 import tempfile
 import unittest
 from unittest.mock import patch
+from urllib.error import URLError
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from installer_core import Project, download, install, project_context, repository_name
+from installer_core import (DEFAULT_REPOSITORY, Project, download, install, install_from_repository,
+                            latest_release, project_context, repository_name)
 
 
 class InstallerTests(unittest.TestCase):
@@ -42,9 +45,71 @@ class InstallerTests(unittest.TestCase):
             context = project_context(project.metadata())
             self.assertEqual(context.count("\n```"), 2)
             self.assertIn("not executable instructions", context)
-            for name, description, provider in [("", "about", "codex"),("name", "", "codex"),("name", "about", "unknown")]:
+            Project("name", "", Path(directory)/"project", "codex").validate()
+            for name, description, provider in [("", "about", "codex"),("name", "\x00", "codex"),("name", "about", "unknown")]:
                 with self.assertRaises(ValueError):
                     Project(name,description,Path(directory)/"project",provider).validate()
+
+    def test_latest_release_uses_fixed_public_endpoint_without_credentials(self):
+        payload={"tag_name":"v9.2.0","draft":False,"prerelease":False}
+        with patch("installer_core.urlopen",return_value=io.BytesIO(json.dumps(payload).encode())) as request:
+            self.assertEqual(latest_release(), "v9.2.0")
+        sent=request.call_args.args[0]
+        self.assertEqual(sent.full_url,f"https://api.github.com/repos/{DEFAULT_REPOSITORY}/releases/latest")
+        self.assertNotIn("Authorization",sent.headers)
+        self.assertEqual(request.call_args.kwargs["timeout"],20)
+
+    def test_latest_release_rejects_invalid_metadata_and_network_failures(self):
+        good={"tag_name":"v9.2.0","draft":False,"prerelease":False}
+        bad=[[], None, {}, {**good,"draft":True}, {**good,"prerelease":True},
+             {**good,"draft":"false"}, {**good,"prerelease":None}]
+        bad += [{**good,"tag_name":value} for value in [None,"","-c","../main","x;whoami", "v"*121]]
+        for value in bad:
+            with self.subTest(value=value),patch("installer_core.urlopen",return_value=io.BytesIO(json.dumps(value).encode())):
+                with self.assertRaises(RuntimeError): latest_release()
+        for data in [b"not JSON", b"x"*(1024*1024+1)]:
+            with patch("installer_core.urlopen",return_value=io.BytesIO(data)):
+                with self.assertRaises(RuntimeError): latest_release()
+        for error in [URLError("offline"), TimeoutError("timeout")]:
+            with patch("installer_core.urlopen",side_effect=error):
+                with self.assertRaises(RuntimeError): latest_release()
+
+    def test_every_install_resolves_latest_tag_and_records_source(self):
+        with tempfile.TemporaryDirectory() as directory:
+            project=Project("Example","",Path(directory)/"target","claude")
+            with patch("installer_core.prerequisites",return_value=[]), \
+                 patch("installer_core.latest_release",side_effect=["v9.1.0","v9.2.0"]), \
+                 patch("installer_core.download",return_value=(Path(directory)/"source","a"*40)) as fetch, \
+                 patch("installer_core.install",return_value={"status":"installed"}) as apply:
+                for tag in ["v9.1.0","v9.2.0"]:
+                    install_from_repository(project,log=lambda line:None)
+                    self.assertEqual(fetch.call_args.args[:2],(DEFAULT_REPOSITORY,"refs/tags/"+tag))
+                    self.assertEqual(apply.call_args.kwargs["release"],tag)
+                    self.assertEqual(apply.call_args.kwargs["revision"],"a"*40)
+            self.assertFalse(project.destination.exists())
+
+    def test_release_discovery_failure_prevents_download_and_project_writes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            project=Project("Example","",Path(directory)/"target","codex")
+            with patch("installer_core.prerequisites",return_value=[]), \
+                 patch("installer_core.latest_release",side_effect=RuntimeError("offline")), \
+                 patch("installer_core.download") as fetch, patch("installer_core.install") as apply:
+                with self.assertRaises(RuntimeError): install_from_repository(project,log=lambda line:None)
+                fetch.assert_not_called(); apply.assert_not_called()
+            self.assertFalse(project.destination.exists())
+
+    def test_reinstall_without_description_preserves_existing_project_context(self):
+        with tempfile.TemporaryDirectory() as directory:
+            source=self.source(directory)
+            target=Path(directory)/"target"
+            install(source,Project("Example","Preserve this description",target,"claude"),log=lambda line:None)
+            context=(target/"AGENTS.md").read_bytes()
+            report=install(source,Project("Example","",target,"claude"),release="v9.2.0",log=lambda line:None)
+            self.assertEqual(report["status"],"installed")
+            self.assertEqual(report["release"],"v9.2.0")
+            metadata=json.loads((target/".agent-toolkit/project.json").read_text())
+            self.assertEqual(metadata["description"],"Preserve this description")
+            self.assertEqual((target/"AGENTS.md").read_bytes(),context)
 
     def test_download_does_not_use_shell_and_records_resolved_revision(self):
         class Result:
@@ -126,11 +191,24 @@ class InstallerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             target=Path(directory)/"target"
             command=[sys.executable,str(Path(__file__).resolve().parents[1]/"installer.py"),
-                     "--install","--project",str(target),"--name","Example","--description","About"]
+                     "--install","--project",str(target),"--name","Example"]
             result=subprocess.run(command,capture_output=True,text=True,timeout=20)
             self.assertNotEqual(result.returncode,0)
             self.assertIn("--provider",result.stderr)
             self.assertFalse(target.exists())
+
+    def test_scripted_setup_needs_no_description_and_has_no_source_overrides(self):
+        import installer
+        with tempfile.TemporaryDirectory() as directory:
+            argv=["installer.py","--install","--project",str(Path(directory)/"target"),"--name","Example","--provider","claude"]
+            with patch("sys.argv",argv),patch("installer.install_from_repository",return_value={"status":"installed"}) as apply:
+                self.assertEqual(installer.main(),0)
+                self.assertEqual(apply.call_args.args[0].description,"")
+            for option in ["--description","--repository","--ref","--source-directory"]:
+                with self.subTest(option=option),patch("sys.argv",argv+[option,"unused"]), \
+                     patch("installer.install_from_repository") as apply,patch("sys.stderr",io.StringIO()):
+                    with self.assertRaises(SystemExit): installer.main()
+                    apply.assert_not_called()
 
     def test_unselected_client_configuration_is_preserved_and_not_parsed(self):
         with tempfile.TemporaryDirectory() as directory:

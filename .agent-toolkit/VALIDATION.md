@@ -31,4 +31,20 @@ The following checks describe the previous layout before native configuration wa
 - Optional runtime limitations: Strix lacks its CLI, Docker and LLM configuration; Specify, ClawScan and Lighthouse CLIs are not installed. Their sources/skills/adapters are prepared and documented as such. Model preferences were configured, not exhaustively invoked as live model availability tests.
 - Repository graph updated through AST-only `graphify update .`. Its SQL parser is unavailable on this host; JSON manifests contribute no AST nodes. These do not prevent toolkit validation.
 
+## Latest-release installer change: validation (2026-10-05)
+
+The source suite ran 71 cases: 69 passed and two were skipped for Windows symbolic-link privileges; actual junction checks passed. Independent QA found no blocker in the simplified GUI/CLI, fixed-source latest-release resolution, English installation tutorial, source boundaries or existing project preservation. The Python form and rebuilt PyInstaller executable passed their three-provider self-tests, including required provider selection and absent description/repository/ref inputs. Layout checks confirmed the install controls remain visible for each provider. Anonymous latest-release resolution and an exact-tag Git checkout without GitHub CLI authentication succeeded against the then-current public v0.2.1 release. Client/model inference and active security assessments were not run.
+
+## Latest-release installer change: security plan (2026-10-05)
+
+Before implementation, consulted [OWASP Top 10:2025](https://top10.owasp.org/2025/), the [Software Supply Chain Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Software_Supply_Chain_Security_Cheat_Sheet.html) and [GitHub's latest-release API](https://docs.github.com/en/rest/releases/releases#get-the-latest-release). Context7 is supplementary; official GitHub documentation defines release semantics.
+
+Scope: a local user installs public toolkit source into an authorized project. Remote release metadata is untrusted data; the bundled reviewed manager remains the running code. Security permits the bounded simplification with these controls and planned negative checks:
+
+- A01:2025 and A02:2025: preserve destination/link boundaries, existing instructions and selected-provider isolation; test conflicts and foreign configuration preservation.
+- A03:2025 and A08:2025: restrict setup to `Noizboy/agent-toolkit`, resolve a published stable release through HTTPS, validate its tag, record the exact release/commit and retain dependency pins. Test malformed/draft/prerelease responses and ensure no remote Python is executed. Repository maintainer compromise remains a residual risk; latest source is intentionally not a fixed version pin.
+- A05:2025: use subprocess argument arrays and validated tags; test option/path-like refs and existing description-data escaping.
+- A06:2025, A09:2025 and A10:2025: bound network timeout/response size, fail before project writes on discovery/download failure, log release/revision without credentials; test HTTP, invalid JSON and oversized metadata failures.
+- A04:2025 and A07:2025: no new cryptography, account authentication or secret storage. Use default HTTPS certificate verification and no GitHub API credentials; retain environment-only MCP secrets. No authentication-system change or active security assessment is in scope.
+
 This evidence applies to the agent toolkit. Application builds, remote TestSprite scenarios and active security assessments were outside this change. Third-party instructions and dependencies are pinned but these checks do not certify the safety of every upstream package.
