@@ -12,7 +12,7 @@ import tempfile
 from urllib.error import URLError
 from urllib.request import Request, urlopen
 
-from manage import Toolkit, appended_content
+from manage import ExportConflict, Toolkit, appended_content
 from configuration import toml_data
 from providers import configure_provider
 from sources import atomic_text, read_json, safe_path, save_json
@@ -182,9 +182,11 @@ def install(source: Path, project: Project, *, origin="local", revision="local",
         issues = toolkit.export(destination, settings=metadata)
     except (OSError, ValueError, KeyError, RuntimeError) as error:
         # Export can have copied files before an environment failure. Never leave that as an unexplained success.
+        issue = str(error) if isinstance(error, ExportConflict) else "Toolkit export stopped: " + type(error).__name__
+        log("Setup incomplete: " + issue)
         report = {"status": "incomplete", "project": metadata["name"], "provider": project.provider,
                   "destination": str(destination), "revision": revision, "release": release,
-                  "issues": ["Toolkit export stopped: " + type(error).__name__],
+                  "issues": [issue],
                   "runtime_loading": "Not verified; inspect the existing configuration and retry."}
         save_json(safe_path(destination, ".agent-toolkit/installation.json"), report)
         return report

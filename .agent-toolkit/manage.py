@@ -20,6 +20,10 @@ HERE = Path(__file__).resolve().parent
 ROOT = Path.cwd() if getattr(sys, "frozen", False) else HERE.parent
 
 
+class ExportConflict(ValueError):
+    """A controlled, actionable preflight conflict safe to show during setup."""
+
+
 class Toolkit:
     def __init__(self, root: Path):
         self.root = root.resolve()
@@ -292,7 +296,8 @@ class Toolkit:
         for source, relative in files:
             target = safe_path(destination, relative)
             if target.exists() and target.read_bytes() != source.read_bytes():
-                raise ValueError("Export would replace an existing file: " + relative)
+                raise ExportConflict("Existing toolkit file differs: " + relative +
+                                     ". Preserve a backup and merge this file with the downloaded toolkit before retrying.")
         # Share source/artifact pins, not the original project's customization or absolute paths.
         lock = {"schema_version": 1, "tools": {}}
         for name, record in self.state["tools"].items():
@@ -303,13 +308,18 @@ class Toolkit:
         if lock_path.exists():
             lock = read_json(lock_path, lock)
         if lock.get("schema_version") != 1:
-            raise ValueError("Destination has an incompatible toolkit lock")
+            raise ExportConflict("Existing .agent-toolkit/tools.lock.json has an incompatible format. Preserve it and migrate the lock before retrying.")
         append_plans = []
         for relative, template in [("AGENTS.md", "AGENTS.template.md"), (".gitignore", "gitignore.template")]:
             target = safe_path(destination, relative)
             original = target.read_text(encoding="utf-8-sig") if target.exists() else ""
             block = (self.home / template).read_text(encoding="utf-8")
-            append_plans.append((target, appended_content(original, block)))
+            try:
+                content = appended_content(original, block)
+            except ValueError:
+                raise ExportConflict("Existing toolkit routing block differs in " + relative +
+                                     ". Preserve project instructions and merge only the marked toolkit block before retrying.") from None
+            append_plans.append((target, content))
         for source, relative in files:
             target = safe_path(destination, relative)
             target.parent.mkdir(parents=True, exist_ok=True)

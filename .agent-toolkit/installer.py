@@ -114,11 +114,17 @@ class Wizard:
                 if kind=="error":
                     self.status.set("Setup needs attention");messagebox.showerror("Installation stopped",value)
                 else:
-                    self.status.set("Installed" if value["status"]=="installed" else "Installed with unresolved issues")
-                    details=f"{value.get('agents',0)} agents and {value.get('project_skills',0)} project skills prepared.\n\n"
-                    details+="Restart your selected client and review INVENTORY.md.\nOptional CLIs and missing credentials are listed in installation.json."
+                    complete=value["status"]=="installed"
+                    self.status.set("Installed" if complete else "Setup incomplete")
+                    details=(f"{value['agents']} agents and {value['project_skills']} project skills prepared.\n\n"
+                             if "agents" in value and "project_skills" in value else "Installation did not complete.\n\n")
+                    if complete:
+                        details+="Restart your selected client and review INVENTORY.md.\nOptional CLIs and missing credentials are listed in installation.json."
+                    else:
+                        details+="Resolve the issues below and retry setup. Preserve existing files when merging.\nDetails: .agent-toolkit/installation.json."
                     if value["issues"]: details+="\n\nIssues:\n"+"\n".join(value["issues"])
-                    messagebox.showinfo("Setup result",details)
+                    if complete: messagebox.showinfo("Setup result",details)
+                    else: messagebox.showwarning("Setup incomplete",details)
         self.root.after(100,self.poll)
 
     def close(self):

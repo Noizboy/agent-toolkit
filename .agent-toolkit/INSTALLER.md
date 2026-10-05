@@ -30,7 +30,7 @@ An uninstalled checkout contains the canonical `.agent-toolkit/` and shared `.ag
 
 ## Updating an existing project
 
-The current source release is `v0.3.1`. Each installer run downloads the latest stable release automatically. Projects installed from older toolkit revisions are not automatically deleted or overwritten. Review reported source/routing collisions, preserve custom files and merge deliberately. The `v0.1.0` layout additionally requires a deliberate migration to the neutral shared directory. Do not treat a clean source download as permission to remove an old native layout.
+The current source release is `v0.3.2`. Each installer run downloads the latest stable release automatically. Projects installed from older toolkit revisions are not automatically deleted or overwritten. Review reported source/routing collisions, preserve custom files and merge deliberately. The `v0.1.0` layout additionally requires a deliberate migration to the neutral shared directory. Do not treat a clean source download as permission to remove an old native layout.
 
 Version `v0.2.1` includes [a model-selection prompt](prompts/select-agent-models.md) and a conditional `AGENTS.md` instruction to read it for model requests. It guides the AI's research and supported configuration changes; it does not add automatic discovery, live evaluations or active-session model switching to the executable.
 
@@ -59,3 +59,7 @@ Output: `AgentToolkitSetup.exe` and `SHA256SUMS.txt` in the repository root. Int
 For scripted setup, use the executable or Python source with `--install --project PATH --name NAME --provider codex|claude|opencode`. It also downloads the latest stable release; source overrides and description arguments are not supported. Exit status is nonzero for unresolved issues. `--self-test RESULT.json` verifies the packaged setup form without installation.
 
 Configuration references: [Codex subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents), [Claude agents](https://code.claude.com/docs/en/sub-agents), [Claude MCP](https://code.claude.com/docs/en/mcp), [OpenCode agents](https://opencode.ai/docs/agents/), [OpenCode MCP](https://opencode.ai/docs/mcp-servers/) and [PyInstaller](https://pyinstaller.org/en/stable/usage.html).
+
+## Existing toolkit conflicts
+
+If setup stops because an existing toolkit file or marked routing block differs, the dialog names the affected relative path. Back up that file, preserve project-specific instructions and merge only the toolkit content before retrying. A legacy `.codex/toolkit` layout needs this deliberate migration to `.agent-toolkit`; removing the old folder alone does not update its startup skill, `AGENTS.md` routing or ignore block. Customized files are never automatically replaced. Unexpected export errors remain summarized by error type.

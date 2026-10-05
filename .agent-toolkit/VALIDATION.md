@@ -1,4 +1,18 @@
-# Verification evidence — 2026-10-05
+# Verification evidence â€” 2026-10-05
+
+## Installation-conflict repair: validation (2026-10-05)
+
+Independent QA approved the bounded fix. The suite ran 75 cases: 73 passed and two skipped for Windows symbolic-link privileges; junction checks passed. Regression cases cover preserved conflicting startup files and routing blocks, actionable relative paths, redacted unexpected export errors and incomplete GUI severity without fabricated counts. GoSlip migration backed up exactly three reviewed instruction surfaces outside the application and byte-preserved content outside managed blocks. No unrelated application edits or deletions were reverted.
+
+## Installation-conflict repair: security plan (2026-10-05)
+
+Before implementation, consulted [OWASP Top 10:2025](https://top10.owasp.org/2025/) and the [Error Handling Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Error_Handling_Cheat_Sheet.html). A local v0.3.1 failure was reproduced before toolkit writes: the legacy startup skill conflicts with the neutral source; old managed routing/ignore blocks also require migration.
+
+- A01/A02/A08:2025: retain preflight and customized-file protection. Migrate only reviewed managed instructions, retain byte backups, preserve outside-block content and foreign configuration. Test conflict preservation and healthy reinstalls.
+- A09/A10:2025: expose only typed, installer-authored export-conflict messages; keep unexpected export exceptions redacted. Mark incomplete setup as a warning, with no fabricated zero counts or restart instruction. Test actionable paths, secret-bearing unexpected errors and the failure dialog.
+- A03:2025: retain fixed repository, release/commit recording, pinned dependencies and reviewed bundled execution; no download-policy changes. A04/A05/A06/A07:2025 introduce no new authentication, cryptography, untrusted execution or permissions. Backups remain outside the application in ignored build artifacts, with no secret-bearing configuration copied into the public repository. Existing path/secret tests remain applicable. No pentest or code upload is authorized by this repair.
+
+Security permits this bounded fix and deliberate local migration; general customizations remain conflicts requiring a deliberate merge.
 
 ## Model-selection prompt v0.2.1
 

@@ -1,11 +1,12 @@
 import json
 import io
+import queue
 import subprocess
 from pathlib import Path
 import sys
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 from urllib.error import URLError
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -159,6 +160,68 @@ class InstallerTests(unittest.TestCase):
                     install(source,Project("name","description",destination,"codex"))
                 manager.return_value.export.assert_not_called()
             self.assertEqual(metadata.read_bytes(),before)
+
+    def test_startup_skill_conflict_reports_path_without_overwriting_files(self):
+        with tempfile.TemporaryDirectory() as directory:
+            source=self.source(directory)
+            target=Path(directory)/"target"
+            skill=target/".agents/skills/agent-toolkit/SKILL.md"
+            skill.parent.mkdir(parents=True)
+            skill.write_text("Existing legacy or customized toolkit instructions")
+            original=skill.read_bytes()
+            report=install(source,Project("Example","",target,"codex"),log=lambda line:None)
+            self.assertEqual(report["status"],"incomplete")
+            self.assertIn(".agents/skills/agent-toolkit/SKILL.md",report["issues"][0])
+            self.assertIn("merge",report["issues"][0])
+            self.assertEqual(skill.read_bytes(),original)
+            self.assertFalse((target/".agent-toolkit/agents").exists())
+            self.assertNotIn("agents",report)
+
+    def test_routing_conflicts_name_the_file_and_preserve_existing_instructions(self):
+        for filename,block in [("AGENTS.md","<!-- BEGIN generic-agent-toolkit -->\nLegacy routing\n<!-- END generic-agent-toolkit -->"),
+                               (".gitignore","# BEGIN generic-agent-toolkit\nlegacy/\n# END generic-agent-toolkit")]:
+            with self.subTest(filename=filename),tempfile.TemporaryDirectory() as directory:
+                source=self.source(directory)
+                target=Path(directory)/"target"
+                target.mkdir()
+                instructions=target/filename
+                instructions.write_text("Project-specific content\n"+block+"\nKeep this too\n")
+                before=instructions.read_bytes()
+                report=install(source,Project("Example","",target,"claude"),log=lambda line:None)
+                self.assertEqual(report["status"],"incomplete")
+                self.assertIn(filename,report["issues"][0])
+                self.assertIn("marked toolkit block",report["issues"][0])
+                self.assertEqual(instructions.read_bytes(),before)
+                self.assertFalse((target/".agent-toolkit/agents").exists())
+
+    def test_unexpected_export_error_keeps_secret_details_out_of_report_and_logs(self):
+        with tempfile.TemporaryDirectory() as directory:
+            source=self.source(directory)
+            target=Path(directory)/"target"
+            logs=[]
+            secret="unexpected-private-secret-fixture"
+            with patch("installer_core.Toolkit.export",side_effect=ValueError(secret)):
+                report=install(source,Project("Example","",target,"codex"),log=logs.append)
+            self.assertEqual(report["status"],"incomplete")
+            self.assertIn("ValueError",report["issues"][0])
+            self.assertNotIn(secret,json.dumps(report)+" ".join(logs))
+
+    def test_incomplete_export_dialog_does_not_claim_installation_or_invent_counts(self):
+        from installer import Wizard
+        wizard=object.__new__(Wizard)
+        wizard.events=queue.Queue()
+        wizard.events.put(("done",{"status":"incomplete","issues":["Existing toolkit file differs: .agents/skills/agent-toolkit/SKILL.md"]}))
+        wizard.fields=[]
+        for name in ["root","select","browse","button","status"]: setattr(wizard,name,MagicMock())
+        with patch("installer.messagebox.showwarning") as warning,patch("installer.messagebox.showinfo") as success:
+            wizard.poll()
+        wizard.status.set.assert_called_once_with("Setup incomplete")
+        success.assert_not_called()
+        title,details=warning.call_args.args
+        self.assertEqual(title,"Setup incomplete")
+        self.assertIn(".agents/skills/agent-toolkit/SKILL.md",details)
+        self.assertNotIn("0 agents",details)
+        self.assertNotIn("Restart",details)
 
     def test_complete_local_install_uses_real_defaults_for_each_provider(self):
         for provider in ["codex","claude","opencode"]:
