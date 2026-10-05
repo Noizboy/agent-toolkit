@@ -1,5 +1,10 @@
 # Verification evidence — 2026-10-05
 
+## Model-selection prompt v0.2.1
+
+- Documentation QA approved the reusable English prompt, conditional routing, supported Apply-mode limits and distinction between recommendation, configuration and inference verification. Root AGENTS.md matches its template and local documentation links resolve. The project report lives outside the exported payload.
+- The rebuilt executable passed its form self-test. An actual private-repository install from `832c0913e207d71bf68eacfdbcd894b9fbfbe65b` prepared 13 agents and 31 skills in a fresh Claude project with no issues, Codex directory or OpenCode directory. The downloaded prompt matched the source byte-for-byte and AGENTS.md referenced it. No model calls, model-assignment changes or paid evaluations were performed.
+
 ## Provider-neutral v0.2.0
 
 - Shared source and installed maintenance files use `.agent-toolkit/`; canonical agent cards use provider-independent model tiers. Native directories/configuration are generated only after explicit provider selection. The form starts unselected and scripted setup requires `--provider`.
