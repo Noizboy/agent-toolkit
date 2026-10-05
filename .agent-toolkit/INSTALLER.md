@@ -18,7 +18,7 @@ No client is preselected in the form; scripted setup requires `--provider`. Afte
 
 OpenCode is a client: select IDs actually exposed by the authenticated underlying provider. These mappings are configuration, not evidence that a provider currently exposes a particular model.
 
-The repository default is `Noizboy/agent-toolkit`, release `v0.2.0`. You can enter a GitHub repository and an explicit tag, branch or commit. The installer records the resolved commit in the project installation report. Private repository downloads use GitHub CLI authentication: install `gh`, run `gh auth login`, then reopen the installer. Credentials are never requested in the form or written into project files.
+The repository default is `Noizboy/agent-toolkit`, release `v0.2.1`. You can enter a GitHub repository and an explicit tag, branch or commit. The installer records the resolved commit in the project installation report. Private repository downloads use GitHub CLI authentication: install `gh`, run `gh auth login`, then reopen the installer. Credentials are never requested in the form or written into project files.
 
 ## Requirements and results
 
@@ -30,7 +30,9 @@ An uninstalled checkout contains the canonical `.agent-toolkit/` and shared `.ag
 
 ## Updating an existing project
 
-The current source release is `v0.2.0`. Projects installed from the older `v0.1.0` layout are not automatically deleted or overwritten when a new source is selected. Review the reported collision, preserve custom files and perform a deliberate project migration. Do not treat a clean source download as permission to remove the old native layout.
+The current source release is `v0.2.1`. Projects installed from older toolkit revisions are not automatically deleted or overwritten when a new source is selected. Review reported source/routing collisions, preserve custom files and merge deliberately. The `v0.1.0` layout additionally requires a deliberate migration to the neutral shared directory. Do not treat a clean source download as permission to remove an old native layout.
+
+Version `v0.2.1` includes [a model-selection prompt](prompts/select-agent-models.md) and a conditional `AGENTS.md` instruction to read it for model requests. It guides the AI's research and supported configuration changes; it does not add automatic discovery, live evaluations or active-session model switching to the executable.
 
 ## Maintenance
 

@@ -20,6 +20,7 @@ An uninstalled checkout does not create provider-native directories by default. 
 - [manage.py](manage.py): project skill/MCP installer and manager.
 - [registry.json](registry.json): editable catalogue of tools to prepare.
 - [AGENTS.template.md](AGENTS.template.md): concise provider-neutral instructions for role coordination, tool use and OWASP review.
+- [Model selection prompt](prompts/select-agent-models.md): reusable instructions for current model research, per-agent recommendations and explicitly requested configuration changes. Invoke it with "Read .agent-toolkit/prompts/select-agent-models.md and recommend the best available models for each agent using the Balanced profile." Replace "recommend" with "configure" to request supported application. Discovery/evaluation are performed by the AI with available tools; the prompt does not implement a model resolver or switch the running chat model.
 
 To prepare this project and inspect its tools:
 

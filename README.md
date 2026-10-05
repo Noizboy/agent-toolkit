@@ -2,7 +2,7 @@
 
 A reusable, provider-neutral agent team, project-local skills/MCP manager and Windows setup wizard.
 
-Download **AgentToolkitSetup.exe** from the [latest release](https://github.com/Noizboy/agent-toolkit/releases/latest), then double-click it. Enter the project name, description, target folder and the client/provider environment to use: ChatGPT/Codex, Anthropic/Claude Code or OpenCode. The installer is the only place that selects the provider and its model settings.
+Download **AgentToolkitSetup.exe** from the [latest release](https://github.com/Noizboy/agent-toolkit/releases/latest), then double-click it. Enter the project name, description, target folder and the client/provider environment to use: ChatGPT/Codex, Anthropic/Claude Code or OpenCode. The installer records the initial provider and model mapping. Explicit model-selection requests can subsequently update supported project model settings through the reusable prompt and synchronization command.
 
 Git, Python 3.11+ and Node.js/npm are required. For this private repository, authenticate with GitHub CLI using `gh auth login` before downloading/installing. Credentials remain in the environment or keychain and are never copied into the toolkit.
 
@@ -25,6 +25,7 @@ An uninstalled checkout has no provider-native `.codex/`, `.claude/` or `.openco
 - [Reusable AGENTS.md template](.agent-toolkit/AGENTS.template.md)
 - [Editable tool registry](.agent-toolkit/registry.json)
 - [Security policy](.agent-toolkit/agents/Security-Policy.md)
+- [Prompt for choosing agent models](.agent-toolkit/prompts/select-agent-models.md)
 
 ## Install from a checkout
 
@@ -41,7 +42,7 @@ python .agent-toolkit/manage.py doctor
 
 `bootstrap` and `sync-agents` use the provider recorded in `.agent-toolkit/project.json`. They do not infer a default provider from the canonical cards. Model tiers are mapped to the selected provider's configured strong, light and escalation models; generated native files do not change the primary chat model automatically.
 
-The current release line is **v0.2.0**. A project installed from the older v0.1.0 layout is not automatically deleted or overwritten during source updates. Use a deliberate project migration after reviewing collisions and preserving custom files.
+The current release is **v0.2.1**, which includes the reusable model-selection prompt. Installed older toolkit revisions are preserved during source updates; review and merge source/routing collisions deliberately. The v0.1.0 layout additionally needs a project migration to the neutral shared directory.
 
 There are 13 roles and 15 registered tool sources. Optional audit CLIs have separate runtime prerequisites; setup does not execute audits, tests, scans or pentests. Before security-sensitive implementation, agents consult current official OWASP guidance and record controls and verification evidence.
 

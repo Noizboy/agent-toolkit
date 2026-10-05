@@ -16,7 +16,7 @@ from providers import configure_provider
 from sources import atomic_text, read_json, safe_path, save_json
 
 DEFAULT_REPOSITORY = "Noizboy/agent-toolkit"
-DEFAULT_REF = "v0.2.0"
+DEFAULT_REF = "v0.2.1"
 PROVIDERS = {"ChatGPT / Codex": "codex", "Anthropic / Claude Code": "claude", "OpenCode": "opencode"}
 
 
